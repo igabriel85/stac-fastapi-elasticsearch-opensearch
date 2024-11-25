@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-elasticsearch
+  template:
+    metadata:
+      labels:
+        app: app-elasticsearch
+    spec:
+      containers:
+      - name: app-elasticsearch
+        image: quay.io/igabriel185/stac-fastapi-es
+        command: ["/bin/sh", "-c"]
+        args: ["./scripts/wait-for-it-es.sh elasticsearch:9200 && python -m stac_fastapi.elasticsearch.app"]
+        ports:
+        - containerPort: 8080
+        env:
+        - name: STAC_FASTAPI_TITLE
+          value: stac-fastapi-elasticsearch
+        - name: STAC_FASTAPI_DESCRIPTION
+          value: A STAC FastAPI with an Elasticsearch backend
+        - name: STAC_FASTAPI_VERSION
+          value: '2.1'
+        - name: APP_HOST
+          value: 0.0.0.0
+        - name: APP_PORT
+          value: '8080'
+        - name: RELOAD
+          value: 'true'
+        - name: ENVIRONMENT
+          value: local
+        - name: WEB_CONCURRENCY
+          value: '10'
+        - name: ES_HOST
+          value: elasticsearch
+        - name: ES_PORT
+          value: '9200'
+        - name: ES_USE_SSL
+          value: 'false'
+        - name: ES_VERIFY_CERTS
+          value: 'false'
+        - name: BACKEND
+          value: elasticsearch
+        volumeMounts:
+        - name: es-pvc
+          mountPath: /usr/share/elasticsearch/data
+      volumes:
+      - name: es-pvc
+        persistentVolumeClaim:
+          claimName: es-persistent-volume-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-elasticsearch
+spec:
+  selector:
+    app: app-elasticsearch
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "4"
+          limits:
+            memory: "16Gi"
+            cpu: "8"
+        ports:
+        - containerPort: 9200
+        env:
+        - name: ES_JAVA_OPTS
+          value: "-Xms4g -Xmx8g"
+
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+      volumes:
+      - name: config-volume
+        configMap:
+          name: es-conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+spec:
+  selector:
+    app: elasticsearch
+  ports:
+  - protocol: TCP
+    port: 9200
+    targetPort: 9200
+  type: ClusterIP
