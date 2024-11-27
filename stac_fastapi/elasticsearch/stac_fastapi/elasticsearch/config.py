@@ -25,11 +25,11 @@ def _es_config() -> Dict[str, Any]:
         "headers": {"accept": "application/vnd.elasticsearch+json; compatible-with=7"},
     }
     # Timouts
-    config["timeout"] = os.getenv("ES_TIMEOUT", 60)
+    # config["timeout"] = os.getenv("ES_TIMEOUT", 60)
     config["retry_on_timeout"] = True
     config["max_retries"] = 3
     config["retry_on_status"] = [429, 502, 503, 504, 500]
-    config["request_timeout"] = 60
+    config["request_timeout"] = os.getenv("ES_TIMEOUT", 60)
 
     # Handle API key
     if api_key := os.getenv("ES_API_KEY"):
