@@ -4,7 +4,13 @@ node.name: es01
 network.host: 0.0.0.0
 transport.host: 0.0.0.0
 discovery.type: single-node
+
+
+# http
 http.port: 9200
+transport.tcp.compress: true
+http.compression: true
+http.compression_level: 3
 
 path:
   repo:
@@ -21,8 +27,8 @@ xpack.security.transport.ssl.enabled: false
 bootstrap.memory_lock: true
 
 # thread pool
-thread_pool.search.size: 24 #default 3* Cores
-thread_pool.search.queue_size: 200 # 1000
+thread_pool.search.size: 32 #default 3* Cores
+thread_pool.search.queue_size: 1000 # 1000
 #thread_pool.write.queue_size: 10000 # 1000
 
 # index
