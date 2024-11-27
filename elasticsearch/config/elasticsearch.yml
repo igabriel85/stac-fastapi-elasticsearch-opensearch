@@ -16,3 +16,17 @@ xpack.license.self_generated.type: basic
 # Security
 xpack.security.enabled: false
 xpack.security.transport.ssl.enabled: false
+
+# memory
+bootstrap.memory_lock: true
+bootstrap.mlockall: true
+
+# thread pool
+thread_pool.search.size: 24 #default 3* Cores
+thread_pool.search.queue_size: 200 # 1000
+#thread_pool.write.queue_size: 10000 # 1000
+
+# index
+indices.breaker.total.limit: 85%
+indices.queries.cache.size: 20%  # Percentage of heap memory
+indices.queries.cache.count: 100000  # Maximum number of cached queries
