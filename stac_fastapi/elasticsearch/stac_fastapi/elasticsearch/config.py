@@ -11,6 +11,7 @@ from stac_fastapi.types.config import ApiSettings
 
 
 def _es_config() -> Dict[str, Any]:
+
     # Determine the scheme (http or https)
     use_ssl = os.getenv("ES_USE_SSL", "true").lower() == "true"
     scheme = "https" if use_ssl else "http"
@@ -23,6 +24,12 @@ def _es_config() -> Dict[str, Any]:
         "hosts": hosts,
         "headers": {"accept": "application/vnd.elasticsearch+json; compatible-with=7"},
     }
+    # Timouts
+    config["timeout"] = os.getenv("ES_TIMEOUT", 60)
+    config["retry_on_timeout"] = True
+    config["max_retries"] = 3
+    config["retry_on_status"] = [429, 502, 503, 504, 500]
+    config["request_timeout"] = 60
 
     # Handle API key
     if api_key := os.getenv("ES_API_KEY"):
@@ -50,12 +57,7 @@ def _es_config() -> Dict[str, Any]:
     if (u := os.getenv("ES_USER")) and (p := os.getenv("ES_PASS")):
         config["http_auth"] = (u, p)
 
-    # Timouts
-    config["timeout"] = os.getenv("ES_TIMEOUT", 60)
-    config["retry_on_timeout"] = True
-    config["max_retries"] = 3
-    config["retry_on_status"] = [429, 502, 503, 504, 500]
-    config["request_timeout"] = 60
+
 
 
     return config
