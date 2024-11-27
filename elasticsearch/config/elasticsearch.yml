@@ -19,7 +19,6 @@ xpack.security.transport.ssl.enabled: false
 
 # memory
 bootstrap.memory_lock: true
-bootstrap.mlockall: true
 
 # thread pool
 thread_pool.search.size: 24 #default 3* Cores
