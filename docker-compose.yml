@@ -77,6 +77,10 @@ services:
       - ./elasticsearch/snapshots:/usr/share/elasticsearch/snapshots
     ports:
       - "9200:9200"
+    ulimits:
+        memlock:
+            soft: -1
+            hard: -1
 
 #  opensearch:
 #    container_name: os-container
