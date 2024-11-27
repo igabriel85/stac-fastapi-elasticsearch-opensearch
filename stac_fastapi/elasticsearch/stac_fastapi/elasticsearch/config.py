@@ -26,10 +26,16 @@ def _es_config() -> Dict[str, Any]:
     }
     # Timouts
     # config["timeout"] = os.getenv("ES_TIMEOUT", 60)
-    config["retry_on_timeout"] = True
-    config["max_retries"] = 3
-    config["retry_on_status"] = [429, 502, 503, 504, 500]
-    config["request_timeout"] = os.getenv("ES_TIMEOUT", 60)
+    try:
+        config["retry_on_timeout"] = True
+        config["max_retries"] = 3
+        config["retry_on_status"] = [429, 502, 503, 504, 500]
+        config["request_timeout"] = int(os.getenv("ES_TIMEOUT", 60))
+    except Exception as e:
+        config["retry_on_timeout"] = True
+        config["max_retries"] = 3
+        config["retry_on_status"] = [429, 502, 503, 504, 500]
+        config["request_timeout"] = 60
 
     # Handle API key
     if api_key := os.getenv("ES_API_KEY"):
